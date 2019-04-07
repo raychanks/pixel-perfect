@@ -1,4 +1,4 @@
-const coordinates = {
+let coordinates = {
     start: {
         page: {
             x: 0,
@@ -32,6 +32,7 @@ const eventHandlers = {
         coordinates.start.client.y = event.clientY;
 
         renderSelectionBoxUI(coordinates.start.client, coordinates.start.client);
+        updatePixelDisplay(coordinates.start.client, coordinates.start.client);
     },
     overlayMouseMove(event) {
         if (!isMouseDown) {
@@ -44,8 +45,13 @@ const eventHandlers = {
         coordinates.end.client.y = event.clientY;
 
         renderSelectionBoxUI(coordinates.start.client, coordinates.end.client);
+        updatePixelDisplay(coordinates.start.client, coordinates.end.client);
     },
     overlayMouseUp(event) {
+        if (!isMouseDown) {
+            return;
+        }
+
         isMouseDown = false;
 
         coordinates.end.page.x = event.pageX;
@@ -54,6 +60,12 @@ const eventHandlers = {
         coordinates.end.client.y = event.clientY;
 
         renderSelectionBoxUI(coordinates.start.client, coordinates.end.client);
+        updatePixelDisplay(coordinates.start.client, coordinates.end.client);
+    },
+    topMenuMouseEnter(event) {
+    },
+    stopPropagation(event) {
+        event.stopPropagation();
     },
 };
 
@@ -73,6 +85,11 @@ chrome.runtime.onMessage.addListener(
                 newOverlay.on('mousedown', eventHandlers.overlayMouseDown);
                 newOverlay.on('mouseup', eventHandlers.overlayMouseUp);
                 newOverlay.on('mousemove', eventHandlers.overlayMouseMove);
+
+                $('.pp-top-menu').on('mousedown', eventHandlers.stopPropagation);
+                $('.pp-top-menu').on('mouseup', eventHandlers.stopPropagation);
+                $('.pp-top-menu').on('mousemove', eventHandlers.stopPropagation);
+                // $('.pp-top-menu').on('mouseenter', eventHandlers.topMenuMouseEnter);
             }
         }
     }
@@ -89,16 +106,26 @@ function createExtensionOverlay() {
                 <button>Bottom</button>
                 <button>Left</button>
                 <button>Right</button>
+                <button class="pp-top-menu__clear-btn">Clear</button>
             </div>
             <div class="pp-top-menu__pixel-display-container">
-                <input type="text" value="0px" />
+                <div>
+                    Width:
+                    <input class="pp-top-menu__pixel-display pp-top-menu__width-pixel-display" type="text" value="0" />
+                    px
+                </div>
                 <span>x</span>
-                <input type="text" value="0px" />
+                <div>
+                    Height:
+                    <input class="pp-top-menu__pixel-display pp-top-menu__height-pixel-display" type="text" value="0" />
+                    px
+                </div>
             </div>
         </div>
     `;
 
     overlay.html(topMenuHtmlString);
+    $('.pp-top-menu__clear-btn').on('click', reset);
 
     return overlay;
 }
@@ -127,4 +154,43 @@ function renderSelectionBoxUI(coor1, coor2) {
             style="width: ${boxWidth}px; height: ${boxHeight}px; top: ${boxTop}px; left: ${boxLeft}px;"
         />`
     );
+}
+
+function updatePixelDisplay(coor1, coor2) {
+    const widthDisplayEl = $('.pp-top-menu__width-pixel-display');
+    const heightDisplayEl = $('.pp-top-menu__height-pixel-display');
+    const boxWidth = Math.abs(coor1.x - coor2.x);
+    const boxHeight = Math.abs(coor1.y - coor2.y);
+
+    widthDisplayEl.val(boxWidth);
+    heightDisplayEl.val(boxHeight);
+}
+
+function reset() {
+    isMouseDown = false;
+    coordinates = {
+        start: {
+            page: {
+                x: 0,
+                y: 0,
+            },
+            client: {
+                x: 0,
+                y: 0,
+            },
+        },
+        end: {
+            page: {
+                x: 0,
+                y: 0,
+            },
+            client: {
+                x: 0,
+                y: 0,
+            },
+        },
+    };
+
+    renderSelectionBoxUI(coordinates.start.client, coordinates.end.client);
+    updatePixelDisplay(coordinates.start.client, coordinates.end.client);
 }

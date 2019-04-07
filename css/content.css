@@ -9,6 +9,10 @@
     z-index: 9999999;
 }
 
+#pixel-perfect-overlay * {
+    user-select: none;
+}
+
 .pp-top-menu {
     display: flex;
     align-items: center;
@@ -21,6 +25,22 @@
 
 .pp-top-menu__pixel-display-container {
     margin: 0 auto;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.pp-top-menu__pixel-display-container span {
+    margin: 0 10px;
+}
+
+.pp-top-menu__pixel-display {
+    border: none;
+    background: #ddd;
+    width: 50px;
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 5px;
 }
 
 .pp-selection-box {
