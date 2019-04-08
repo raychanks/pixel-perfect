@@ -36,6 +36,11 @@ const eventHandlers = {
     },
     overlayMouseMove(event) {
         if (!isMouseDown) {
+            renderReticle({
+                x: event.clientX,
+                y: event.clientY,
+            });
+
             return;
         }
 
@@ -63,6 +68,7 @@ const eventHandlers = {
         updatePixelDisplay(coordinates.start.client, coordinates.end.client);
     },
     topMenuMouseEnter(event) {
+        hideReticle();
     },
     stopPropagation(event) {
         event.stopPropagation();
@@ -89,7 +95,7 @@ chrome.runtime.onMessage.addListener(
                 $('.pp-top-menu').on('mousedown', eventHandlers.stopPropagation);
                 $('.pp-top-menu').on('mouseup', eventHandlers.stopPropagation);
                 $('.pp-top-menu').on('mousemove', eventHandlers.stopPropagation);
-                // $('.pp-top-menu').on('mouseenter', eventHandlers.topMenuMouseEnter);
+                $('.pp-top-menu').on('mouseenter', eventHandlers.topMenuMouseEnter);
             }
         }
     }
@@ -122,6 +128,8 @@ function createExtensionOverlay() {
                 </div>
             </div>
         </div>
+        <div class="pp-reticle-verticle" />
+        <div class="pp-reticle-horizontal" />
     `;
 
     overlay.html(topMenuHtmlString);
@@ -164,6 +172,21 @@ function updatePixelDisplay(coor1, coor2) {
 
     widthDisplayEl.val(boxWidth);
     heightDisplayEl.val(boxHeight);
+}
+
+function renderReticle(coor) {
+    const verticalLine = $('.pp-reticle-verticle');
+    const horizontalLine = $('.pp-reticle-horizontal');
+
+    verticalLine.show();
+    horizontalLine.show();
+    verticalLine.css('left', coor.x + 'px');
+    horizontalLine.css('top', coor.y + 'px');
+}
+
+function hideReticle() {
+    $('.pp-reticle-verticle').hide();
+    $('.pp-reticle-horizontal').hide();
 }
 
 function reset() {
